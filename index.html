@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PRIVATE SLOTS - VIRTUAL</title>
+    <style>
+        :root { --gold: #ffd700; --dark: #0d0d0d; --card: #1a1a1a; --red: #ff3e3e; --green: #00ff88; }
+        body { background: var(--dark); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow-x: hidden; }
+
+        /* HEADER - SENSOR RAHASIA DI SINI */
+        .header { background: #000; padding: 20px; border-bottom: 2px solid var(--gold); text-align: center; cursor: pointer; -webkit-user-select: none; }
+        .logo { color: var(--gold); font-weight: bold; font-size: 1.4rem; letter-spacing: 3px; }
+
+        .container { padding: 15px; }
+        .page { display: none; }
+        .active { display: block; animation: fadeIn 0.3s; }
+
+        /* SLOT VIEW */
+        .slot-machine { background: #1a1a1a; border: 3px solid #333; border-radius: 20px; padding: 25px; text-align: center; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .reels { display: flex; justify-content: center; gap: 10px; margin: 25px 0; }
+        .reel { background: #000; width: 70px; height: 85px; display: flex; align-items: center; justify-content: center; font-size: 3rem; border-radius: 10px; border: 2px solid #444; }
+
+        /* ADMIN PANEL (HIDDEN BY DEFAULT) */
+        #admin-panel { background: rgba(20,20,20,0.95); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; padding: 20px; box-sizing: border-box; display: none; overflow-y: auto; }
+        .admin-card { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 5px solid var(--gold); }
+        .btn-ctrl { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 48%; margin-top: 10px; }
+        .btn-win { background: var(--green); color: black; }
+        .btn-lose { background: var(--red); color: white; }
+
+        /* BOT NAV (NO ADMIN BUTTON) */
+        .nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; height: 65px; border-top: 1px solid #333; }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; color: #666; }
+        .nav-item.active { color: var(--gold); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="header" onclick="secretTrigger()">
+    <div class="logo">PRIVATE SLOTS</div>
+    <div style="font-size: 0.6rem; color: #555; margin-top: 5px;">OFFICIAL VIRTUAL SERVER</div>
+</div>
+
+<div class="container">
+    <div id="game-page" class="page active">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #111; padding: 10px; border-radius: 8px;">
+            <div style="font-size: 0.8rem;">USER: <b id="display-name">Guest</b></div>
+            <div style="color: var(--green); font-weight: bold;">Rp <span id="display-saldo">0</span></div>
+        </div>
+
+        <div class="slot-machine">
+            <div class="reels">
+                <div class="reel" id="r1">❓</div>
+                <div class="reel" id="r2">❓</div>
+                <div class="reel" id="r3">❓</div>
+            </div>
+            <button onclick="spin()" style="background: linear-gradient(to bottom, var(--gold), #b8860b); border: none; padding: 18px; border-radius: 50px; color: black; font-weight: bold; font-size: 1.1rem; width: 100%; box-shadow: 0 5px 0 #7a5d07;">SPIN (BET 5K)</button>
+        </div>
+    </div>
+</div>
+
+<div id="admin-panel">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="color:var(--gold)">MASTER CONTROL</h2>
+        <button onclick="closeAdmin()" style="background:none; border:1px solid #555; color:white; padding:5px 10px;">TUTUP</button>
+    </div>
+    <hr style="border:0; border-top:1px solid #333; margin: 15px 0;">
+    <div id="admin-list"></div>
+</div>
+
+<div class="nav">
+    <div class="nav-item active"><span>🎰</span><br>Lobby</div>
+    <div class="nav-item"><span>🏆</span><br>Ranking</div>
+    <div class="nav-item"><span>👤</span><br>Profile</div>
+</div>
+
+<script>
+    let players = [
+        { name: "Andi_Kece", saldo: 50000, logic: "NORMAL" },
+        { name: "Budi_Slot", saldo: 50000, logic: "NORMAL" },
+        { name: "Sultan_KW", saldo: 50000, logic: "NORMAL" }
+    ];
+    
+    let activeIdx = 0;
+    let clickCount = 0;
+    const items = ["🍒", "🔔", "💎", "7️⃣", "🍋"];
+
+    function secretTrigger() {
+        clickCount++;
+        if(clickCount >= 5) {
+            document.getElementById('admin-panel').style.display = 'block';
+            renderAdmin();
+            clickCount = 0;
+        }
+        setTimeout(() => { clickCount = 0; }, 2000); // Reset hitungan jika jeda terlalu lama
+    }
+
+    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+
+    function renderAdmin() {
+        const list = document.getElementById('admin-list');
+        list.innerHTML = players.map((p, i) => `
+            <div class="admin-card">
+                <b>${p.name}</b><br>
+                <small>Saldo: Rp ${p.saldo.toLocaleString()}</small><br>
+                <small>Logic Saat Ini: <b style="color:var(--gold)">${p.logic}</b></small>
+                <div style="display:flex; justify-content:space-between;">
+                    <button class="btn-ctrl btn-win" onclick="setLogic(${i}, 'WIN')">SET MENANG</button>
+                    <button class="btn-ctrl btn-lose" onclick="setLogic(${i}, 'LOSE')">SET RUNGKAD</button>
+                </div>
+                <button onclick="switchUser(${i})" style="width:100%; margin-top:8px; background:#444; color:white; border:none; padding:8px; border-radius:5px;">Login sebagai ${p.name}</button>
+            </div>
+        `).join('');
+    }
+
+    function setLogic(i, mode) { players[i].logic = mode; renderAdmin(); }
+    
+    function switchUser(i) { 
+        activeIdx = i; 
+        updateUI(); 
+        closeAdmin(); 
+    }
+
+    function updateUI() {
+        document.getElementById('display-name').innerText = players[activeIdx].name;
+        document.getElementById('display-saldo').innerText = players[activeIdx].saldo.toLocaleString();
+    }
+
+    function spin() {
+        let p = players[activeIdx];
+        if(p.saldo < 5000) return alert("Saldo Habis!");
+        p.saldo -= 5000;
+
+        let s1, s2, s3;
+        if(p.logic === 'WIN') {
+            s1 = s2 = s3 = items[Math.floor(Math.random() * items.length)];
+            p.saldo += 50000;
+        } else if(p.logic === 'LOSE') {
+            s1 = items[0]; s2 = items[1]; s3 = items[2];
+        } else {
+            s1 = items[Math.floor(Math.random() * items.length)];
+            s2 = items[Math.floor(Math.random() * items.length)];
+            s3 = items[Math.floor(Math.random() * items.length)];
+            if(s1===s2 && s2===s3) p.saldo += 50000;
+        }
+
+        document.getElementById('r1').innerText = s1;
+        document.getElementById('r2').innerText = s2;
+        document.getElementById('r3').innerText = s3;
+        updateUI();
+    }
+
+    updateUI();
+</script>
+</body>
+</html>
